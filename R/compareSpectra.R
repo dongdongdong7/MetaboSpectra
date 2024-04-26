@@ -41,6 +41,7 @@ get_spMat <- function(standardRow){
 #' The number of peaks in the mass spectrum.
 #' @param scale_int
 #' Normalized target value.
+#' @param normalize_intensity Whether to normalize the intensity to sum to 1
 #' @return
 #' spMat.
 #' @details
@@ -55,12 +56,19 @@ get_spMat <- function(standardRow){
 #' spMat <- get_spMat(standardRow)
 #' spMat <- clean_spMat(spMat)
 clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
-                        min_mz = -1, max_mz = -1, noise_threshold = 0.05, max_peak_num = -1, scale_int = 100){
-  spMat <- msentropy::clean_spectrum(spMat, min_ms2_difference_in_da = tol_da2, min_ms2_difference_in_ppm = tol_ppm2,
-                                     min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num,
-                                     normalize_intensity = FALSE)
-  if(scale_int != -1) spMat[, "intensity"] <- scale_int *spMat[, "intensity"] / max(spMat[, "intensity"])
-  return(spMat)
+                        min_mz = -1, max_mz = -1, noise_threshold = 0.05, max_peak_num = -1, scale_int = 100, normalize_intensity = FALSE){
+  if(normalize_intensity){
+    spMat <- msentropy::clean_spectrum(spMat, min_ms2_difference_in_da = tol_da2, min_ms2_difference_in_ppm = tol_ppm2,
+                                       min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num,
+                                       normalize_intensity = TRUE)
+    return(spMat)
+  }else{
+    spMat <- msentropy::clean_spectrum(spMat, min_ms2_difference_in_da = tol_da2, min_ms2_difference_in_ppm = tol_ppm2,
+                                       min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num,
+                                       normalize_intensity = FALSE)
+    if(scale_int != -1) spMat[, "intensity"] <- scale_int *spMat[, "intensity"] / max(spMat[, "intensity"])
+    return(spMat)
+  }
 }
 
 #' @title searchLib_entropy
@@ -100,8 +108,6 @@ clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
 #' Peak intensity below noise_threshold * max(intensity) will be considered noise.
 #' @param max_peak_num
 #' The number of peaks in the mass spectrum.
-#' @param scale_int
-#' Normalized target value.
 #' @details
 #' min_mz, max_mz, noise_threshold, max_peak_num, scale_int are parameter of function clean_spectra.
 #'
@@ -116,7 +122,7 @@ clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
 searchLib_entropy <- function(standardInput, lib, st = 0.8,
                               tol_da1 = 0.01, tol_ppm1 = -1, tol_da2 = 0.02, tol_ppm2 = -1,
                               predicted = "All", thread = 1,
-                              min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1, scale_int = 100){
+                              min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1){
   t1 <- Sys.time()
   if(tol_da1 != -1 & tol_ppm1 != -1) tol_da1 = -1
   else if(tol_da1 == -1 & tol_ppm1 == -1) stop("tol is wrong!")
@@ -149,11 +155,11 @@ searchLib_entropy <- function(standardInput, lib, st = 0.8,
 
     spMat_query <- get_spMat(standardInput_tmp)
     spMat_query <- clean_spMat(spMat_query, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
+                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
     score_vec <- sapply(1:nrow(lib_ms2_tmp), function(j) {
       spMat_lib <- get_spMat(lib_ms2_tmp[j, ])
       spMat_lib <- clean_spMat(spMat_lib, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
+                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
       score <- msentropy::calculate_entropy_similarity(spMat_query, spMat_lib,
                                                        ms2_tolerance_in_da = tol_da2, ms2_tolerance_in_ppm = tol_ppm2,
                                                        clean_spectra = FALSE, min_mz = min_mz, max_mz = max_mz,

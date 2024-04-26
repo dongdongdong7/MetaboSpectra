@@ -12,7 +12,8 @@ clean_spMat(
   max_mz = -1,
   noise_threshold = 0.05,
   max_peak_num = -1,
-  scale_int = 100
+  scale_int = 100,
+  normalize_intensity = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ clean_spMat(
 \item{max_peak_num}{The number of peaks in the mass spectrum.}
 
 \item{scale_int}{Normalized target value.}
+
+\item{normalize_intensity}{Whether to normalize the intensity to sum to 1}
 }
 \value{
 spMat.

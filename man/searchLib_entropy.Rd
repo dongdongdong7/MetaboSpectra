@@ -17,8 +17,7 @@ searchLib_entropy(
   min_mz = -1,
   max_mz = -1,
   noise_threshold = 0.01,
-  max_peak_num = -1,
-  scale_int = 100
+  max_peak_num = -1
 )
 }
 \arguments{
@@ -54,8 +53,6 @@ Both mz and intensity are stored in tibble as a list.}
 \item{noise_threshold}{Peak intensity below noise_threshold * max(intensity) will be considered noise.}
 
 \item{max_peak_num}{The number of peaks in the mass spectrum.}
-
-\item{scale_int}{Normalized target value.}
 }
 \value{
 searchRes_entropy, a list.
