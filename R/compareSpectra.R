@@ -304,7 +304,6 @@ searchLib_ndotproduct <- function(standardInput, lib, joinpeak = "inner", st = 0
   message(paste0("query number: ", query_number))
   message(paste0("cmps number: ", cmps_number))
   message(paste0("ms2 number: ", ms2_number))
-  browser()
 
   loop <- function(i){
     standardInput_tmp <- standardInput[i, ]
