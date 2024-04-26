@@ -3,8 +3,14 @@ devtools::document()
 data("standardInput")
 
 searchRes_entropy <- searchLib_entropy(standardInput = standardInput, lib = publicMs2List$hmdb, thread = 8,
-                                       st = 0.2, tol_da2 = 0.02, predicted = "All")
-searchRes_entropy[[1]]
+                                       st = 0.2, tol_da2 = 0.08, predicted = "All")
+searchRes_entropy[[2]]
+spMat_lib <- get_spMat(searchRes_entropy[[2]][5, ])
+spMat_lib <- clean_spMat(spMat_lib)
+plotSpectra(spMat_lib)
+spMat_query <- get_spMat(standardInput[2, ])
+spMat_query <- clean_spMat(spMat_query)
+plotSpectra(spMat_lib)
 
 standardInput
 idenTibble_entropy <- standardInput
