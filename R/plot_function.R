@@ -28,10 +28,112 @@ plotSpectra <- function(spMat, num = 10){
   df$label_point <- label_point
   df$label_text <- label_text
   p <- ggplot2::ggplot(df, ggplot2::aes(x = mz, y = intensity)) +
-    ggplot2::geom_segment(ggplot2::aes(x = mz, xend = mz, y = 0, yend = intensity), color = "grey") +
+    ggplot2::geom_segment(ggplot2::aes(x = mz, xend = mz, y = 0, yend = intensity)) +
     ggplot2::geom_point(ggplot2::aes(x = mz, y = label_point), color = "orange", size = 4) +
     ggrepel::geom_text_repel(ggplot2::aes(label = label_text), size = 4, vjust = -1, min.segment.length = Inf) +
     #ggplot2::labs(title = sp2$peak_id, subtitle = paste0("Retention time: ", sprintf("%.4f", Spectra::rtime(sp2)))) +
-    ggplot2::theme_classic()
+    ggplot2::theme_light() +
+    ggplot2::geom_hline(yintercept = 0) +
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank()
+    )
+  return(p)
+}
+
+#' @title plotComparableSpectra
+#' @description
+#' Compare the two mass spectra
+#'
+#' @param spMat_query Query spectra matrix
+#' @param spMat_lib Library spectra matrix
+#' @param num max peak number
+#' @param tol_da2
+#' Under the Da unit, two peaks are considered the tolerance of one peak.
+#' @param tol_ppm2
+#' Under the ppm unit, two peaks are considered the tolerance of one peak.
+#'
+#' @return
+#' A ggplot object.
+#' @export
+#'
+#' @examples
+#' mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)
+#' intensity <- c(100, 1300, 4030, 10000, 31600, 1000)
+#' standardRow1 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat1 <- get_spMat(standardRow1)
+#' mz <- c(21.3000, 40.1120, 86.3200, 138.3210, 276.5310)
+#' intensity <- c(100, 1300, 4030, 10000, 31600)
+#' standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat2 <- get_spMat(standardRow2)
+#' plotComparableSpectra(spMat1, spMat2, tol_ppm2 = 200, tol_da2 = -1)
+#' plotComparableSpectra(spMat1, spMat2, tol_ppm2 = -1, tol_da2 = 0.02)
+plotComparableSpectra <- function(spMat_query, spMat_lib, num = 10, tol_da2 = 0.02, tol_ppm2 = -1){
+  if(tol_da2 == -1 & tol_ppm2 != -1) tol_da2 <- 0
+  else if(tol_da2 != -1 & tol_ppm2 == -1) tol_ppm2 <- 0
+  else if(tol_da2 != -1 & tol_ppm2 != -1) tol_ppm2 <- 0
+  else stop("tol is wrong!")
+
+  mz_query <- spMat_query[, "mz"];intensity_query <- spMat_query[,"intensity"]
+  df_query <- tibble::tibble(mz = mz_query, intensity = intensity_query) %>%
+    dplyr::arrange(dplyr::desc(intensity))
+  n_query <- nrow(df_query)
+  mz_lib <- spMat_lib[, "mz"];intensity_lib <- spMat_lib[,"intensity"]
+  df_lib <- tibble::tibble(mz = mz_lib, intensity = intensity_lib) %>%
+    dplyr::arrange(dplyr::desc(intensity))
+  n_lib <- nrow(df_lib)
+  if(n_lib > num) n_lib <- num
+  if(n_query > num) n_query <- num
+
+  tmpList <- Spectra::joinPeaks(x = spMat_query, y = spMat_lib,type = "inner", tolerance = tol_da2, ppm = tol_ppm2)
+  logical_x <- sapply(df_query$mz, function(x) {
+    return(any(dplyr::near(x, tmpList$x[, "mz"])))
+  })
+  logical_y <- sapply(df_lib$mz, function(x) {
+    return(any(dplyr::near(x, tmpList$y[, "mz"])))
+  })
+  df_query$type <- sapply(logical_x, function(x) {
+    if(x) return("match")
+    else return("mismatch")
+  })
+  df_lib$type <- sapply(logical_y, function(x) {
+    if(x) return("match")
+    else return("mismatch")
+  })
+  df_lib$intensity <- -df_lib$intensity
+
+  df_query <- df_query[1:n_query, ]
+  df_lib <- df_lib[1:n_lib, ]
+
+  df <- rbind(df_query, df_lib)
+  df$label_point <- sapply(1:nrow(df), function(i) {
+    if(df[i, ]$type == "match") return(df[i, ]$intensity)
+    else return(NA)
+  })
+  df$label_text1 <- sapply(1:nrow(df), function(i) {
+    if(df[i, ]$type == "match" & df[i, ]$intensity > 0) return(df[i, ]$mz)
+    else return(NA)
+  })
+  df$label_text2 <- sapply(1:nrow(df), function(i) {
+    if(df[i, ]$type == "match" & df[i, ]$intensity < 0) return(df[i, ]$mz)
+    else return(NA)
+  })
+
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = mz, y = intensity)) +
+    ggplot2::geom_segment(ggplot2::aes(x = mz, xend = mz, y = 0, yend = intensity)) +
+    # ggplot2::geom_point(ggplot2::aes(x = mz, y = label_point), color = "orange", size = 4) +
+    # ggrepel::geom_text_repel(ggplot2::aes(label = label_text1), size = 4, vjust = 1, min.segment.length = Inf) +
+    # ggrepel::geom_text_repel(ggplot2::aes(label = label_text2), size = 4, vjust = 0, min.segment.length = Inf) +
+    ggplot2::theme_light() +
+    ggplot2::geom_hline(yintercept = 0) +
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank()
+    )
+  if(any(!is.na(df$label_point))){
+    p <- p + ggplot2::geom_point(ggplot2::aes(x = mz, y = label_point), color = "orange", size = 4) +
+      ggrepel::geom_text_repel(ggplot2::aes(label = label_text1), size = 4, vjust = 1, min.segment.length = Inf) +
+      ggrepel::geom_text_repel(ggplot2::aes(label = label_text2), size = 4, vjust = 0, min.segment.length = Inf)
+  }
   return(p)
 }
