@@ -201,3 +201,12 @@ msentropy::calculate_entropy_similarity(spMat_query, spMat_lib,
                                         clean_spectra = FALSE, min_mz = -1, max_mz = -1,
                                         noise_threshold = -1,
                                         max_peak_num = -1)
+
+
+S <- function(I){
+  I <- I / sum(I)
+  -sum(I*log(I, base = exp(1)))
+}
+S(c(1, 100, 1))
+S(c(1, 100, 10))
+S(c(100, 100, 100))
