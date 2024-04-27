@@ -4,13 +4,43 @@ data("standardInput")
 
 searchRes_entropy <- searchLib_entropy(standardInput = standardInput, lib = publicMs2List$hmdb, thread = 8,
                                        st = 0.2, tol_da2 = 0.08, predicted = "All")
-searchRes_entropy[[2]]
-spMat_lib <- get_spMat(searchRes_entropy[[2]][5, ])
+idenTibble_entropy <- searchRes2idenTibble(standardInput, searchRes_entropy, top = 5)
+searchRes_entropy[[5]]
+spMat_lib <- get_spMat(searchRes_entropy[[5]][3, ])
 spMat_lib <- clean_spMat(spMat_lib)
 plotSpectra(spMat_lib)
-spMat_query <- get_spMat(standardInput[2, ])
+plotSpectra(spMat_lib, min_mz = 50, max_mz = 80)
+spMat_query <- get_spMat(standardInput[5, ])
 spMat_query <- clean_spMat(spMat_query)
+plotSpectra(spMat_query)
+plotSpectra(spMat_query, min_mz = 50, max_mz = 80)
+
+low_vec <- sapply(1:nrow(standardInput), function(i) {
+  standardInput_tmp <- standardInput[i, ]
+  if(length(standardInput_tmp$mz[[1]]) == 2) return(TRUE)
+  else return(FALSE)
+})
+standardInput_low <- standardInput[low_vec, ]
+searchRes_low <- searchLib_entropy(standardInput = standardInput_low, lib = publicMs2List$hmdb, thread = 8,
+                                       st = 0, tol_da1 = 0.01,tol_da2 = 0.02, predicted = "All")
+idenTibble_low <- searchRes2idenTibble(standardInput_low, searchRes_low)
+View(idenTibble_low)
+i <- 29
+ms2_lib <- searchRes_low[[i]] %>%
+  dplyr::distinct(inchikey, .keep_all = TRUE)
+ms2_lib <- searchRes_low[[i]] %>%
+  dplyr::filter(accession == "HMDB0000783")
+spMat_lib <- get_spMat(ms2_lib[2, ])
+#spMat_lib <- get_spMat(searchRes_low[[i]][which(searchRes_low[[i]]$accession == "HMDB0001310")[2], ] )
+spMat_lib <- clean_spMat(spMat_lib, noise_threshold = 0.01)
 plotSpectra(spMat_lib)
+plotSpectra(spMat_lib, min_mz = 70, max_mz = 140)
+spMat_query <- get_spMat(idenTibble_low[i, ])
+spMat_query <- clean_spMat(spMat_query, noise_threshold = 0.01)
+plotSpectra(spMat_query)
+plotSpectra(spMat_query, min_mz = 70, max_mz = 140)
+
+plotComparableSpectra(spMat_query, spMat_lib, num = 20)
 
 standardInput
 idenTibble_entropy <- standardInput

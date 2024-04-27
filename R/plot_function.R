@@ -4,6 +4,8 @@
 #'
 #' @param spMat spectra matrix
 #' @param num max peak number
+#' @param min_mz The minimum value of the horizontal coordinate
+#' @param max_mz The maximum value of the horizontal coordinate
 #'
 #' @return
 #' A ggplot object
@@ -15,7 +17,7 @@
 #' standardRow <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 #' spMat <- get_spMat(standardRow)
 #' plotSpectra(spMat)
-plotSpectra <- function(spMat, num = 10){
+plotSpectra <- function(spMat, num = 10, min_mz = NA, max_mz = NA){
   mz <- spMat[, "mz"];intensity <- spMat[,"intensity"]
   df <- tibble::tibble(mz = mz, intensity = intensity) %>%
     dplyr::arrange(dplyr::desc(intensity))
@@ -38,6 +40,7 @@ plotSpectra <- function(spMat, num = 10){
       panel.grid.major.x = ggplot2::element_blank(),
       panel.grid.minor.x = ggplot2::element_blank()
     )
+  if(!is.na(min_mz) | !is.na(max_mz)) p <- p+ggplot2::xlim(min_mz, max_mz)
   return(p)
 }
 

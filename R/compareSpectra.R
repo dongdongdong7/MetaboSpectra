@@ -169,7 +169,7 @@ searchLib_entropy <- function(standardInput, lib, st = 0.8,
     })
     lib_ms2_tmp$score <- score_vec
     lib_ms2_tmp <- lib_ms2_tmp %>%
-      dplyr::filter(score > st) %>%
+      dplyr::filter(score >= st) %>%
       dplyr::arrange(dplyr::desc(score))
     return(lib_ms2_tmp)
   }
@@ -336,7 +336,7 @@ searchLib_ndotproduct <- function(standardInput, lib, joinpeak = "inner", st = 0
     })
     lib_ms2_tmp$score <- score_vec
     lib_ms2_tmp <- lib_ms2_tmp %>%
-      dplyr::filter(score > st) %>%
+      dplyr::filter(score >= st) %>%
       dplyr::arrange(dplyr::desc(score))
     return(lib_ms2_tmp)
   }

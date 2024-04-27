@@ -4,12 +4,16 @@
 \alias{plotSpectra}
 \title{plotSpectra}
 \usage{
-plotSpectra(spMat, num = 10)
+plotSpectra(spMat, num = 10, min_mz = NA, max_mz = NA)
 }
 \arguments{
 \item{spMat}{spectra matrix}
 
 \item{num}{max peak number}
+
+\item{min_mz}{The minimum value of the horizontal coordinate}
+
+\item{max_mz}{The maximum value of the horizontal coordinate}
 }
 \value{
 A ggplot object
