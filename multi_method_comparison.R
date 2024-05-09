@@ -1,8 +1,8 @@
-load("D:/fudan/Projects/2024/MetaboSpectra/Progress/Database/build_package/MetaboLib.ms2/publicMs2List.RData")
+load("D:/fudan/Projects/2024/MetaboSpectra/Progress/Database/build_package/MetaboLib.ms2/hmdbMs2List.RData")
 devtools::document()
 data("standardInput")
 
-searchRes_entropy <- searchLib_entropy(standardInput = standardInput, lib = publicMs2List$hmdb, thread = 8,
+searchRes_entropy <- searchLib_entropy(standardInput = standardInput, lib = hmdbMs2List, thread = 8,
                                        st = 0.2, tol_da2 = 0.08, predicted = "All")
 idenTibble_entropy <- searchRes2idenTibble(standardInput, searchRes_entropy, top = 5)
 searchRes_entropy[[5]]
@@ -14,6 +14,15 @@ spMat_query <- get_spMat(standardInput[5, ])
 spMat_query <- clean_spMat(spMat_query)
 plotSpectra(spMat_query)
 plotSpectra(spMat_query, min_mz = 50, max_mz = 80)
+
+lib_test <- hmdbMs2List$ms2[hmdbMs2List$ms2$accession == "HMDB0000038", ]
+spMat_lib <- get_spMat(lib_test[1, ])
+spMat_lib <- clean_spMat(spMat_lib)
+plotSpectra(spMat_lib)
+spMat_query <- get_spMat(standardInput[71, ])
+spMat_query <- clean_spMat(spMat_query)
+plotSpectra(spMat_query)
+plotComparableSpectra(spMat_query, spMat_lib)
 
 low_vec <- sapply(1:nrow(standardInput), function(i) {
   standardInput_tmp <- standardInput[i, ]
@@ -77,7 +86,7 @@ idenTibble_entropy$iden_score <- sapply(searchRes_entropy, function(x) {
 
 print(idenTibble_entropy[300:400, c("id", "iden_id", "iden_score")], n = 100)
 delete_vec <- sapply(1:nrow(idenTibble_entropy), function(i) {
-  if(length(idenTibble_entropy[i,]$mz[[1]]) == 0) return(FALSE)
+  if(length(idenTibble_entropy[i,]$mz[[1]]) == 0 | idenTibble_entropy[i,]$iden_inchikey == "") return(FALSE)
   else return(TRUE)
 })
 idenTibble_entropy <- idenTibble_entropy[delete_vec, ]

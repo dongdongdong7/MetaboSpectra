@@ -34,5 +34,6 @@ standardInput_T3_Pos <- dplyr::left_join(standardInput_T3_Pos, inHouseMs2List$T3
 
 standardInput <- rbind(standardInput_Amide_Neg, standardInput_Amide_Pos, standardInput_T3_Neg, standardInput_T3_Pos) %>%
   dplyr::arrange(accession)
+colnames(standardInput)[1] <- "id"
 
 usethis::use_data(standardInput, overwrite = TRUE)
