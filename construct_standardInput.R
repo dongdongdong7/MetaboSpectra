@@ -34,6 +34,14 @@ standardInput_T3_Pos <- dplyr::left_join(standardInput_T3_Pos, inHouseMs2List$T3
 
 standardInput <- rbind(standardInput_Amide_Neg, standardInput_Amide_Pos, standardInput_T3_Neg, standardInput_T3_Pos) %>%
   dplyr::arrange(accession)
-colnames(standardInput)[1] <- "id"
+colnames(standardInput)[1] <- "feature"
 
+standardInput_identified <- standardInput
+standardInput$feature <- sapply(1:nrow(standardInput), function(i) {
+  tmp <- standardInput[i, ]
+  rt_tmp <- round(tmp$rt, 2)
+  mz_tmp <- round(tmp$precursorMz, 4)
+  feature_name <- paste0(rt_tmp, "_", mz_tmp, "m/z")
+})
 usethis::use_data(standardInput, overwrite = TRUE)
+usethis::use_data(standardInput_identified, overwrite = TRUE)
