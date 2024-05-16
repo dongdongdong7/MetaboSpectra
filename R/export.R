@@ -4,7 +4,7 @@
 #'
 #' @param standardInput
 #' A tibble, including six columns of information,
-#' id: name of the feature,
+#' feature: name of the feature,
 #' precursorMz: parent ion mz,
 #' rt: retention time,
 #' adduct: adduct form,

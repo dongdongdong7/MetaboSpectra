@@ -77,7 +77,7 @@ clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
 #'
 #' @param standardInput
 #' A tibble, including six columns of information,
-#' id: name of the feature,
+#' feature: name of the feature,
 #' precursorMz: parent ion mz,
 #' rt: retention time,
 #' adduct: adduct form,
@@ -251,7 +251,7 @@ compare_spMat_ndotproduct <- function(x, y, joinpeak = "inner", tol_da2 = 0.02, 
 #'
 #' @param standardInput
 #' A tibble, including six columns of information,
-#' id: name of the feature,
+#' feature: name of the feature,
 #' precursorMz: parent ion mz,
 #' rt: retention time,
 #' adduct: adduct form,
