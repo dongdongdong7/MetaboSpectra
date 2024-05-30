@@ -2,6 +2,7 @@
 
 export("%>%")
 export(clean_spMat)
+export(compare_spMat_entropy)
 export(compare_spMat_ndotproduct)
 export(get_spMat)
 export(plotComparableSpectra)

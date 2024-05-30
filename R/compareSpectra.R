@@ -70,7 +70,46 @@ clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
     return(spMat)
   }
 }
+#' @title compare_spMat_entropy
+#' @description
+#' Compare two spMat using entropy
+#'
+#' @param x Query spMat
+#' @param y Library spMat
+#' @param tol_da2
+#' Under the Da unit, two peaks are considered the tolerance of one peak.
+#' @param tol_ppm2
+#' Under the ppm unit, two peaks are considered the tolerance of one peak.
+#'
+#' @return A score.
+#' @export
+#'
+#' @examples
+#' mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)
+#' intensity <- c(100, 1300, 4030, 10000, 31600, 1000)
+#' standardRow1 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat1 <- get_spMat(standardRow1)
+#' mz <- c(21.3000, 40.1120, 86.3200, 138.3210, 276.5310)
+#' intensity <- c(100, 1300, 4030, 10000, 31600)
+#' standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat2 <- get_spMat(standardRow2)
+#' Normalize intensity (sum to 1)
+#' spMat1 <- clean_spMat(spMat1, normalize_intensity = TRUE)
+#' spMat2 <- clean_spMat(spMat2, normalize_intensity = TRUE)
+#' compare_spMat_entropy(x = spMat1, y = spMat2, tol_da2 = 0.05)
+compare_spMat_entropy <- function(x, y, tol_da2 = 0.02, tol_ppm2 = -1){
+  if(tol_da2 != -1 & tol_ppm2 != -1) tol_da2 = -1
+  else if(tol_da2 == -1 & tol_ppm2 == -1) stop("tol is wrong!")
 
+  if(nrow(x) != 1) x <- x[order(x[, 1]), ]
+  if(nrow(y) != 1) y <- y[order(y[, 1]), ]
+  score <- msentropy::calculate_entropy_similarity(x, y,
+                                                   ms2_tolerance_in_da = tol_da2, ms2_tolerance_in_ppm = tol_ppm2,
+                                                   clean_spectra = FALSE, min_mz = -1, max_mz = -1,
+                                                   noise_threshold = -1,
+                                                   max_peak_num = -1)
+  return(score)
+}
 #' @title searchLib_entropy
 #' @description
 #' The mass spectrometry database was screened using the spectral entropy algorithm.

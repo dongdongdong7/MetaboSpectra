@@ -8,7 +8,7 @@ searchRes2idenTibble(standardInput, searchRes, top = 5)
 }
 \arguments{
 \item{standardInput}{A tibble, including six columns of information,
-id: name of the feature,
+feature: name of the feature,
 precursorMz: parent ion mz,
 rt: retention time,
 adduct: adduct form,
