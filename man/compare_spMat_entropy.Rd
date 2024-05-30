@@ -33,5 +33,5 @@ spMat2 <- get_spMat(standardRow2)
 Normalize intensity (sum to 1)
 spMat1 <- clean_spMat(spMat1, normalize_intensity = TRUE)
 spMat2 <- clean_spMat(spMat2, normalize_intensity = TRUE)
-compare_spMat_entropy(x = spMat1, y = spMat2)
+compare_spMat_entropy(x = spMat1, y = spMat2, tol_da2 = 0.05)
 }
