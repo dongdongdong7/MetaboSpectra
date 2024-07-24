@@ -30,11 +30,11 @@ A ggplot object.
 Compare the two mass spectra
 }
 \examples{
-mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)
+mz <- c(21.3303, 40.1326, 86.3402, 138.3291, 276.5717, 276.5836)
 intensity <- c(100, 1300, 4030, 10000, 31600, 1000)
 standardRow1 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 spMat1 <- get_spMat(standardRow1)
-mz <- c(21.3000, 40.1120, 86.3200, 138.3210, 276.5310)
+mz <- c(21.3002, 40.1128, 86.3201, 138.3214, 276.5312)
 intensity <- c(100, 1300, 4030, 10000, 31600)
 standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 spMat2 <- get_spMat(standardRow2)
