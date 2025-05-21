@@ -1,11 +1,33 @@
-#' @title get_spMat
+#' Pipe operator
+#' @name %>%
+#' @export
+#' @importFrom magrittr %>%
+NULL
+
+## Rcpp
+## usethis::use_rcpp()
+#' @useDynLib MetaboSpectra
+#' @importFrom Rcpp evalCpp
+NULL
+
+## usethis namespace: start
+#' @useDynLib MetaboSpectra, .registration = TRUE
+## usethis namespace: end
+NULL
+
+## usethis namespace: start
+#' @importFrom Rcpp sourceCpp
+## usethis namespace: end
+NULL
+
+#' @title Get a spectrum matrix
 #' @description
-#' Get a spMat from a tibble.
+#' Get a spectrum matrix from a tibble.
 #'
 #' @param standardRow
 #' A tibble which need to include two columns mz and intensity.
 #'
-#' @return A matrix, spMat
+#' @return `matrix()` with two columns mz and intensity
 #' @export
 #'
 #' @examples
@@ -15,37 +37,29 @@
 #' get_spMat(standardRow)
 get_spMat <- function(standardRow){
   if(nrow(standardRow) != 1) stop("standardRow must has 1 row!")
-  spMat <- matrix(c(standardRow$mz[[1]], standardRow$intensity[[1]]), ncol = 2,
+  mz <- standardRow$mz[[1]];intensity <- standardRow$intensity[[1]]
+  if(length(mz) != length(intensity)) stop("length of mz and intensity don't match")
+  spMat <- matrix(c(mz, intensity), ncol = 2,
                   dimnames = list(NULL, c("mz", "intensity")))
-  if(nrow(spMat) != 1) spMat <- spMat[order(spMat[, 1]), ]
+  spMat <- spMat[complete.cases(spMat), , drop = FALSE] # remove NA
+  spMat <- spMat[order(spMat[, "mz"]), , drop = FALSE]
   return(spMat)
 }
 
-#' @title clean_spMat
+#' @title Clean spectrum matrix
 #' @description
 #' Clean a spMat includes removing noise, merging similar peaks, and intensity normaliaztion.
 #'
-#' @param spMat
-#' The matrix from the mass spectrum needs to contain two columns, mz and intensity.
-#' @param tol_da2
-#' Under the Da unit, two peaks are considered the tolerance of one peak.
-#' @param tol_ppm2
-#' Under the ppm unit, two peaks are considered the tolerance of one peak.
-#' @param min_mz
-#' Minimum value of mz.
-#' @param max_mz
-#' Maximum value of mz.
-#' @param noise_threshold
-#' Peak intensity below noise_threshold * max(intensity) will be considered noise.
-#' @param max_peak_num
-#' The number of peaks in the mass spectrum.
-#' @param scale_int
-#' Normalized target value.
+#' @param spMat The matrix from the mass spectrum needs to contain two columns, mz and intensity.
+#' @param ppm The minimum mz difference in ppm to merge peaks, any two peaks with mz difference < ppm will be merged
+#' @param min_mz The minimum mz value to keep, set to -1 to disable
+#' @param max_mz The maximum mz value to keep, set to -1 to disable
+#' @param noise_threshold The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed
+#' @param max_peak_num The maximum number of peaks to keep, set to -1 to disable
+#' @param scale_int Normalized target value, set to -1 to disable
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
-#' @return
-#' spMat.
-#' @details
-#' The value of the parameter is set to -1 to turn off.
+#'
+#' @return spMat.
 #'
 #' @export
 #'
@@ -55,33 +69,28 @@ get_spMat <- function(standardRow){
 #' standardRow <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 #' spMat <- get_spMat(standardRow)
 #' spMat <- clean_spMat(spMat)
-clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
-                        min_mz = -1, max_mz = -1, noise_threshold = 0.05, max_peak_num = -1, scale_int = 100, normalize_intensity = FALSE){
-  if(normalize_intensity){
-    spMat <- msentropy::clean_spectrum(spMat, min_ms2_difference_in_da = tol_da2, min_ms2_difference_in_ppm = tol_ppm2,
-                                       min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num,
-                                       normalize_intensity = TRUE)
-    return(spMat)
-  }else{
-    spMat <- msentropy::clean_spectrum(spMat, min_ms2_difference_in_da = tol_da2, min_ms2_difference_in_ppm = tol_ppm2,
-                                       min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num,
-                                       normalize_intensity = FALSE)
+#'
+clean_spMat <- function(spMat, ppm = 5,
+                        min_mz = -1, max_mz = -1,
+                        noise_threshold = 0.01,
+                        max_peak_num = -1,
+                        scale_int = 100,
+                        normalize_intensity = FALSE){
+  spMat <- clean_spectrum(spMat = spMat, min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, ppm = ppm, max_peak_num = max_peak_num, normalize_intensity = normalize_intensity)
+  if(!normalize_intensity){
     if(scale_int != -1) spMat[, "intensity"] <- scale_int *spMat[, "intensity"] / max(spMat[, "intensity"])
-    return(spMat)
   }
+  return(spMat)
 }
-#' @title compare_spMat_entropy
+#' @title Compare spMat entropy
 #' @description
 #' Compare two spMat using entropy
 #'
 #' @param x Query spMat
 #' @param y Library spMat
-#' @param tol_da2
-#' Under the Da unit, two peaks are considered the tolerance of one peak.
-#' @param tol_ppm2
-#' Under the ppm unit, two peaks are considered the tolerance of one peak.
+#' @param ppm The MS2 tolerance in ppm
 #'
-#' @return A score.
+#' @return The entropy similarity
 #' @export
 #'
 #' @examples
@@ -93,23 +102,22 @@ clean_spMat <- function(spMat, tol_da2 = 0.02, tol_ppm2 = -1,
 #' intensity <- c(100, 1300, 4030, 10000, 31600)
 #' standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 #' spMat2 <- get_spMat(standardRow2)
-#' Normalize intensity (sum to 1)
+#' # Normalize intensity (sum to 1)
 #' spMat1 <- clean_spMat(spMat1, normalize_intensity = TRUE)
 #' spMat2 <- clean_spMat(spMat2, normalize_intensity = TRUE)
-#' compare_spMat_entropy(x = spMat1, y = spMat2, tol_da2 = 0.05)
-compare_spMat_entropy <- function(x, y, tol_da2 = 0.02, tol_ppm2 = -1){
-  if(tol_da2 != -1 & tol_ppm2 != -1) tol_da2 = -1
-  else if(tol_da2 == -1 & tol_ppm2 == -1) stop("tol is wrong!")
-
-  if(nrow(x) != 1) x <- x[order(x[, 1]), ]
-  if(nrow(y) != 1) y <- y[order(y[, 1]), ]
-  score <- msentropy::calculate_entropy_similarity(x, y,
-                                                   ms2_tolerance_in_da = tol_da2, ms2_tolerance_in_ppm = tol_ppm2,
-                                                   clean_spectra = FALSE, min_mz = -1, max_mz = -1,
-                                                   noise_threshold = -1,
-                                                   max_peak_num = -1)
+#' compare_spMat_entropy(x = spMat1, y = spMat2, ppm = 5)
+compare_spMat_entropy <- function(x, y, ppm = 5, unweighted = FALSE){
+  if(ppm < 1) stop("ppm is wrong!")
+  x <- x[order(x[, 1]), , drop = FALSE]
+  y <- y[order(y[, 1]), , drop = FALSE]
+  if(unweighted){
+    score <- calculate_unweighted_entropy_similarity(spMat1 = x, spMat2 = y, ppm = ppm)
+  }else{
+    score <- calculate_entropy_similarity(spMat1 = x, spMat2 = y, ppm = ppm)
+  }
   return(score)
 }
+
 #' @title searchLib_entropy
 #' @description
 #' The mass spectrometry database was screened using the spectral entropy algorithm.
