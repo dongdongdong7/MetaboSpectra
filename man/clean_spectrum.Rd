@@ -9,7 +9,8 @@ clean_spectrum(
   min_mz = -1,
   max_mz = -1,
   noise_threshold = 0.01,
-  ppm = 5,
+  min_ms2_difference_in_da = -1,
+  min_ms2_difference_in_ppm = 5,
   max_peak_num = -1,
   normalize_intensity = FALSE
 )
@@ -23,7 +24,9 @@ clean_spectrum(
 
 \item{noise_threshold}{The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed}
 
-\item{ppm}{The minimum mz difference in ppm to merge peaks, any two peaks with mz difference < ppm will be merged}
+\item{min_ms2_difference_in_da}{The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged}
+
+\item{min_ms2_difference_in_ppm}{The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged}
 
 \item{max_peak_num}{The maximum number of peaks to keep, set to -1 to disable}
 

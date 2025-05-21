@@ -4,14 +4,21 @@
 \alias{calculate_entropy_similarity}
 \title{Entropy similarity between two spectra}
 \usage{
-calculate_entropy_similarity(spMat1, spMat2, ppm = 5)
+calculate_entropy_similarity(
+  spMat1,
+  spMat2,
+  ms2_tolerance_in_da = -1,
+  ms2_tolerance_in_ppm = 5
+)
 }
 \arguments{
 \item{spMat1}{A matrix of spectral peaks, with two columns: mz and intensity}
 
 \item{spMat2}{A matrix of spectral peaks, with two columns: mz and intensity}
 
-\item{ppm}{The MS2 tolerance in ppm, set to -1 to disable}
+\item{min_ms2_difference_in_da}{The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged}
+
+\item{min_ms2_difference_in_ppm}{The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged}
 }
 \value{
 The entropy similarity

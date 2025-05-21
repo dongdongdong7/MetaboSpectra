@@ -1,4 +1,4 @@
-#' @title Calculate spectral entropy
+#' @title Calculate spectral entropy # TODO: 保留da
 #'
 #' @param spMat A matrix of spectrum, with two columns: m/z and intensity
 #'
@@ -22,7 +22,8 @@ calculate_spectral_entropy <- function(spMat){
 #' @param min_mz The minimum mz value to keep, set to -1 to disable
 #' @param max_mz The maximum mz value to keep, set to -1 to disable
 #' @param noise_threshold The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed
-#' @param ppm The minimum mz difference in ppm to merge peaks, any two peaks with mz difference < ppm will be merged
+#' @param min_ms2_difference_in_da The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged
+#' @param min_ms2_difference_in_ppm The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged
 #' @param max_peak_num The maximum number of peaks to keep, set to -1 to disable
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
 #'
@@ -39,13 +40,14 @@ calculate_spectral_entropy <- function(spMat){
 clean_spectrum <- function(spMat,
                            min_mz = -1, max_mz = -1,
                            noise_threshold = 0.01,
-                           ppm = 5,
+                           min_ms2_difference_in_da = -1,
+                           min_ms2_difference_in_ppm = 5,
                            max_peak_num = -1, normalize_intensity = FALSE){
   .clean_spectrum(peaks = spMat,
                   min_mz = min_mz, max_mz = max_mz,
                   noise_threshold = noise_threshold,
-                  min_ms2_difference_in_da = -1,
-                  min_ms2_difference_in_ppm = ppm,
+                  min_ms2_difference_in_da = min_ms2_difference_in_da,
+                  min_ms2_difference_in_ppm = min_ms2_difference_in_ppm,
                   max_peak_num = max_peak_num,
                   normalize_intensity = normalize_intensity)
 }
@@ -57,7 +59,8 @@ clean_spectrum <- function(spMat,
 #'
 #' @param spMat1 A matrix of spectral peaks, with two columns: mz and intensity
 #' @param spMat2 A matrix of spectral peaks, with two columns: mz and intensity
-#' @param ppm The MS2 tolerance in ppm, set to -1 to disable
+#' @param min_ms2_difference_in_da The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged
+#' @param min_ms2_difference_in_ppm The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged
 #'
 #' @return The unweighted entropy similarity
 #' @export
@@ -70,9 +73,12 @@ clean_spectrum <- function(spMat,
 #' spMat1 <- matrix(c(mz_a, intensity_a), ncol = 2, byrow = FALSE)
 #' spMat2 <- matrix(c(mz_b, intensity_b), ncol = 2, byrow = FALSE)
 #' calculate_unweighted_entropy_similarity(spMat1, spMat2, ppm = 5)
-calculate_unweighted_entropy_similarity <- function(spMat1, spMat2, ppm = 5){
+calculate_unweighted_entropy_similarity <- function(spMat1, spMat2,
+                                                    ms2_tolerance_in_da = -1,
+                                                    ms2_tolerance_in_ppm = 5){
   .calculate_unweighted_entropy_similarity(peaks_a = spMat1, peaks_b = spMat2,
-                                           ms2_tolerance_in_da = -1, ms2_tolerance_in_ppm = ppm,
+                                           ms2_tolerance_in_da = ms2_tolerance_in_da,
+                                           ms2_tolerance_in_ppm = ms2_tolerance_in_ppm,
                                            clean_spectra = FALSE,
                                            min_mz = -1, max_mz = -1,
                                            noise_threshold = -1,
@@ -85,7 +91,8 @@ calculate_unweighted_entropy_similarity <- function(spMat1, spMat2, ppm = 5){
 #'
 #' @param spMat1 A matrix of spectral peaks, with two columns: mz and intensity
 #' @param spMat2 A matrix of spectral peaks, with two columns: mz and intensity
-#' @param ppm The MS2 tolerance in ppm, set to -1 to disable
+#' @param min_ms2_difference_in_da The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged
+#' @param min_ms2_difference_in_ppm The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged
 #' @return The entropy similarity
 #' @export
 #' @examples
@@ -96,9 +103,12 @@ calculate_unweighted_entropy_similarity <- function(spMat1, spMat2, ppm = 5){
 #' spMat1 <- matrix(c(mz_a, intensity_a), ncol = 2, byrow = FALSE)
 #' spMat2 <- matrix(c(mz_b, intensity_b), ncol = 2, byrow = FALSE)
 #' calculate_entropy_similarity(spMat1, spMat2, ppm = 5)
-calculate_entropy_similarity <- function(spMat1, spMat2, ppm = 5){
+calculate_entropy_similarity <- function(spMat1, spMat2,
+                                         ms2_tolerance_in_da = -1,
+                                         ms2_tolerance_in_ppm = 5){
   .calculate_entropy_similarity(peaks_a = spMat1, peaks_b = spMat2,
-                                ms2_tolerance_in_da = -1, ms2_tolerance_in_ppm = ppm,
+                                ms2_tolerance_in_da = ms2_tolerance_in_da,
+                                ms2_tolerance_in_ppm = ms2_tolerance_in_ppm,
                                 clean_spectra = FALSE,
                                 min_mz = -1, max_mz = -1,
                                 noise_threshold = -1,
