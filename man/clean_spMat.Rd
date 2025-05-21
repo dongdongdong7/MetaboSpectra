@@ -6,7 +6,8 @@
 \usage{
 clean_spMat(
   spMat,
-  ppm = 5,
+  min_ms2_difference_in_da = -1,
+  min_ms2_difference_in_ppm = 5,
   min_mz = -1,
   max_mz = -1,
   noise_threshold = 0.01,
@@ -18,7 +19,9 @@ clean_spMat(
 \arguments{
 \item{spMat}{The matrix from the mass spectrum needs to contain two columns, mz and intensity.}
 
-\item{ppm}{The minimum mz difference in ppm to merge peaks, any two peaks with mz difference < ppm will be merged}
+\item{min_ms2_difference_in_da}{The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged}
+
+\item{min_ms2_difference_in_ppm}{The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged}
 
 \item{min_mz}{The minimum mz value to keep, set to -1 to disable}
 

@@ -51,7 +51,8 @@ get_spMat <- function(standardRow){
 #' Clean a spMat includes removing noise, merging similar peaks, and intensity normaliaztion.
 #'
 #' @param spMat The matrix from the mass spectrum needs to contain two columns, mz and intensity.
-#' @param ppm The minimum mz difference in ppm to merge peaks, any two peaks with mz difference < ppm will be merged
+#' @param min_ms2_difference_in_da The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged
+#' @param min_ms2_difference_in_ppm The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged
 #' @param min_mz The minimum mz value to keep, set to -1 to disable
 #' @param max_mz The maximum mz value to keep, set to -1 to disable
 #' @param noise_threshold The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed
@@ -70,13 +71,22 @@ get_spMat <- function(standardRow){
 #' spMat <- get_spMat(standardRow)
 #' spMat <- clean_spMat(spMat)
 #'
-clean_spMat <- function(spMat, ppm = 5,
+clean_spMat <- function(spMat,
+                        min_ms2_difference_in_da = -1,
+                        min_ms2_difference_in_ppm = 5,
                         min_mz = -1, max_mz = -1,
                         noise_threshold = 0.01,
                         max_peak_num = -1,
                         scale_int = 100,
                         normalize_intensity = FALSE){
-  spMat <- clean_spectrum(spMat = spMat, min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, ppm = ppm, max_peak_num = max_peak_num, normalize_intensity = normalize_intensity)
+  if(min_ms2_difference_in_da > 0 & min_ms2_difference_in_ppm > 0) min_ms2_difference_in_ppm <- -1
+  spMat <- clean_spectrum(spMat = spMat,
+                          min_mz = min_mz, max_mz = max_mz,
+                          min_ms2_difference_in_da = min_ms2_difference_in_da,
+                          min_ms2_difference_in_ppm = min_ms2_difference_in_ppm,
+                          noise_threshold = noise_threshold,
+                          max_peak_num = max_peak_num,
+                          normalize_intensity = normalize_intensity)
   if(!normalize_intensity){
     if(scale_int != -1) spMat[, "intensity"] <- scale_int *spMat[, "intensity"] / max(spMat[, "intensity"])
   }
@@ -88,7 +98,8 @@ clean_spMat <- function(spMat, ppm = 5,
 #'
 #' @param x Query spMat
 #' @param y Library spMat
-#' @param ppm The MS2 tolerance in ppm
+#' @param ms2_tolerance_in_da The MS2 tolerance in Da, set to -1 to disable
+#' @param ms2_tolerance_in_ppm The MS2 tolerance in ppm, set to -1 to disable
 #'
 #' @return The entropy similarity
 #' @export
@@ -105,15 +116,22 @@ clean_spMat <- function(spMat, ppm = 5,
 #' # Normalize intensity (sum to 1)
 #' spMat1 <- clean_spMat(spMat1, normalize_intensity = TRUE)
 #' spMat2 <- clean_spMat(spMat2, normalize_intensity = TRUE)
-#' compare_spMat_entropy(x = spMat1, y = spMat2, ppm = 5)
-compare_spMat_entropy <- function(x, y, ppm = 5, unweighted = FALSE){
-  if(ppm < 1) stop("ppm is wrong!")
+#' compare_spMat_entropy(x = spMat1, y = spMat2, ms2_tolerance_in_da = 0.02)
+compare_spMat_entropy <- function(x, y,
+                                  ms2_tolerance_in_da = -1,
+                                  ms2_tolerance_in_ppm = 5,
+                                  unweighted = FALSE){
+  if(ms2_tolerance_in_da > 0 & ms2_tolerance_in_ppm > 0) ms2_tolerance_in_ppm <- -1
   x <- x[order(x[, 1]), , drop = FALSE]
   y <- y[order(y[, 1]), , drop = FALSE]
   if(unweighted){
-    score <- calculate_unweighted_entropy_similarity(spMat1 = x, spMat2 = y, ppm = ppm)
+    score <- calculate_unweighted_entropy_similarity(spMat1 = x, spMat2 = y,
+                                                     ms2_tolerance_in_da = ms2_tolerance_in_da,
+                                                     ms2_tolerance_in_ppm = ms2_tolerance_in_ppm)
   }else{
-    score <- calculate_entropy_similarity(spMat1 = x, spMat2 = y, ppm = ppm)
+    score <- calculate_entropy_similarity(spMat1 = x, spMat2 = y,
+                                          ms2_tolerance_in_da = ms2_tolerance_in_da,
+                                          ms2_tolerance_in_ppm = ms2_tolerance_in_ppm)
   }
   return(score)
 }

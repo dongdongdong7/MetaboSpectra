@@ -4,14 +4,22 @@
 \alias{compare_spMat_entropy}
 \title{Compare spMat entropy}
 \usage{
-compare_spMat_entropy(x, y, ppm = 5, unweighted = FALSE)
+compare_spMat_entropy(
+  x,
+  y,
+  ms2_tolerance_in_da = -1,
+  ms2_tolerance_in_ppm = 5,
+  unweighted = FALSE
+)
 }
 \arguments{
 \item{x}{Query spMat}
 
 \item{y}{Library spMat}
 
-\item{ppm}{The MS2 tolerance in ppm}
+\item{ms2_tolerance_in_da}{The MS2 tolerance in Da, set to -1 to disable}
+
+\item{ms2_tolerance_in_ppm}{The MS2 tolerance in ppm, set to -1 to disable}
 }
 \value{
 The entropy similarity
@@ -31,5 +39,5 @@ spMat2 <- get_spMat(standardRow2)
 # Normalize intensity (sum to 1)
 spMat1 <- clean_spMat(spMat1, normalize_intensity = TRUE)
 spMat2 <- clean_spMat(spMat2, normalize_intensity = TRUE)
-compare_spMat_entropy(x = spMat1, y = spMat2, ppm = 5)
+compare_spMat_entropy(x = spMat1, y = spMat2, ms2_tolerance_in_da = 0.02)
 }
