@@ -93,13 +93,14 @@ clean_spMat <- function(spMat,
   return(spMat)
 }
 #' @title Compare spMat entropy
-#' @description
-#' Compare two spMat using entropy
+#' @description Compare two spMat using entropy. Two spMat must be cleaned before calculate entropy.
+#' The intensity of spMat must sum to 1.
 #'
 #' @param x Query spMat
 #' @param y Library spMat
 #' @param ms2_tolerance_in_da The MS2 tolerance in Da, set to -1 to disable
 #' @param ms2_tolerance_in_ppm The MS2 tolerance in ppm, set to -1 to disable
+#' @param unweighted Whether to calculate the unweighted entropy similarity
 #'
 #' @return The entropy similarity
 #' @export
@@ -135,6 +136,53 @@ compare_spMat_entropy <- function(x, y,
   }
   return(score)
 }
+
+#' @title compare_spMat_ndotproduct
+#' @description
+#' The dot product method is used to compare the similarity of two mass spectrum matrices.
+#'
+#' @param x
+#' spMat_query.
+#' @param y
+#' spMat_lib.
+#' @param joinpeak inner, left, right, outer; More details please see [Spectra::joinPeaks]
+#' @param m `numeric`, weighting for the first column of x and y ("m/z")
+#' @param n `numeric`, weighting for the second column of x and y ("intensity")
+#' @param min_ms2_difference_in_da The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged
+#' @param min_ms2_difference_in_ppm The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged
+#'
+#' @return
+#' A value.
+#' @export
+#'
+#' @examples
+#' mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)
+#' intensity <- c(100, 1300, 4030, 10000, 31600, 1000)
+#' standardRow1 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat1 <- get_spMat(standardRow1)
+#' mz <- c(21.3000, 40.1120, 86.3200, 138.3210, 276.5310)
+#' intensity <- c(100, 1300, 4030, 10000, 31600)
+#' standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
+#' spMat2 <- get_spMat(standardRow2)
+#' # Spectra::joinPeaks(x = spMat1, y = spMat2, type = "inner", tolerance = 0, ppm = 200)
+#' compare_spMat_ndotproduct(x = spMat1, y = spMat2, joinpeak = "outer", ms2_tolerance_in_da = 0.03)
+compare_spMat_ndotproduct <- function(x, y, joinpeak = "inner",
+                                      m = 0L, n = 0.5,
+                                      ms2_tolerance_in_da = -1,
+                                      ms2_tolerance_in_ppm = 5){
+  if(ms2_tolerance_in_da >0 & ms2_tolerance_in_ppm > 0) ms2_tolerance_in_ppm <- -1
+  if(ms2_tolerance_in_da < 0) ms2_tolerance_in_da <- 0
+  if(ms2_tolerance_in_ppm < 0) ms2_tolerance_in_ppm <- 0
+  x <- x[order(x[, 1]), , drop = FALSE]
+  y <- y[order(y[, 1]), , drop = FALSE]
+
+  tmpList <- Spectra::joinPeaks(x = x, y = y,type = joinpeak, tolerance = ms2_tolerance_in_da, ppm = ms2_tolerance_in_ppm)
+  x <- tmpList$x;y <- tmpList$y
+  score <- MsCoreUtils::ndotproduct(x = x, y = y, m = m, n = n)
+  return(score)
+}
+
+# TODO: whether to keep searchLib function?
 
 #' @title searchLib_entropy
 #' @description
@@ -178,7 +226,6 @@ compare_spMat_entropy <- function(x, y,
 #'
 #' @return
 #' searchRes_entropy, a list.
-#' @export
 #'
 #' @examples
 #' data("standardInput", package = "MetaboSpectra")
@@ -265,51 +312,6 @@ searchLib_entropy <- function(standardInput, lib, st = 0.8,
   return(searchRes)
 }
 
-#' @title compare_spMat_ndotproduct
-#' @description
-#' The dot product method is used to compare the similarity of two mass spectrum matrices.
-#'
-#' @param x
-#' spMat_query.
-#' @param y
-#' spMat_lib.
-#' @param joinpeak
-#' See Spectra::joinPeaks type.
-#' inner, left, right, outer
-#' @param tol_da2
-#' Under the Da unit, two peaks are considered the tolerance of one peak.
-#' @param tol_ppm2
-#' Under the ppm unit, two peaks are considered the tolerance of one peak.
-#'
-#' @return
-#' A value.
-#' @export
-#'
-#' @examples
-#' mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)
-#' intensity <- c(100, 1300, 4030, 10000, 31600, 1000)
-#' standardRow1 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
-#' spMat1 <- get_spMat(standardRow1)
-#' mz <- c(21.3000, 40.1120, 86.3200, 138.3210, 276.5310)
-#' intensity <- c(100, 1300, 4030, 10000, 31600)
-#' standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
-#' spMat2 <- get_spMat(standardRow2)
-#' # Spectra::joinPeaks(x = spMat1, y = spMat2, type = "inner", tolerance = 0, ppm = 200)
-#' compare_spMat_ndotproduct(x = spMat1, y = spMat2, joinpeak = "outer", tol_da2 = 0.03)
-compare_spMat_ndotproduct <- function(x, y, joinpeak = "inner", tol_da2 = 0.02, tol_ppm2 = -1){
-  if(tol_da2 == -1 & tol_ppm2 != -1) tol_da2 <- 0
-  else if(tol_da2 != -1 & tol_ppm2 == -1) tol_ppm2 <- 0
-  else if(tol_da2 != -1 & tol_ppm2 != -1) tol_ppm2 <- 0
-  else stop("tol is wrong!")
-
-  if(nrow(x) != 1) x <- x[order(x[, 1]), ]
-  if(nrow(y) != 1) y <- y[order(y[, 1]), ]
-  tmpList <- Spectra::joinPeaks(x = x, y = y,type = joinpeak, tolerance = tol_da2, ppm = tol_ppm2)
-  x <- tmpList$x;y <- tmpList$y
-  score <- MsCoreUtils::ndotproduct(x = x, y = y)
-  return(score)
-}
-
 #' @title searchLib_ndotproduct
 #' @description
 #' The mass spectrometry database was screened using the ndotproduct algorithm.
@@ -355,7 +357,6 @@ compare_spMat_ndotproduct <- function(x, y, joinpeak = "inner", tol_da2 = 0.02, 
 #'
 #' @return
 #' searchRes_ndotproduct, a list.
-#' @export
 #'
 #' @examples
 #' data("standardInput", package = "MetaboSpectra")

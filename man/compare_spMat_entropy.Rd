@@ -20,12 +20,15 @@ compare_spMat_entropy(
 \item{ms2_tolerance_in_da}{The MS2 tolerance in Da, set to -1 to disable}
 
 \item{ms2_tolerance_in_ppm}{The MS2 tolerance in ppm, set to -1 to disable}
+
+\item{unweighted}{Whether to calculate the unweighted entropy similarity}
 }
 \value{
 The entropy similarity
 }
 \description{
-Compare two spMat using entropy
+Compare two spMat using entropy. Two spMat must be cleaned before calculate entropy.
+The intensity of spMat must sum to 1.
 }
 \examples{
 mz <- c(21.3300, 40.1320, 86.3400, 138.3290, 276.5710, 276.5830)

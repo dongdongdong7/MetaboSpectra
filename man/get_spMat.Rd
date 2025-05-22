@@ -10,7 +10,7 @@ get_spMat(standardRow)
 \item{standardRow}{A tibble which need to include two columns mz and intensity.}
 }
 \value{
-`matrix()` with two columns mz and intensity
+\code{matrix()} with two columns mz and intensity
 }
 \description{
 Get a spectrum matrix from a tibble.

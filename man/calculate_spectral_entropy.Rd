@@ -2,7 +2,7 @@
 % Please edit documentation in R/msentropy.R
 \name{calculate_spectral_entropy}
 \alias{calculate_spectral_entropy}
-\title{Calculate spectral entropy # TODO: 保留da}
+\title{Calculate spectral entropy}
 \usage{
 calculate_spectral_entropy(spMat)
 }
@@ -13,7 +13,7 @@ calculate_spectral_entropy(spMat)
 A double value of spectral entropy
 }
 \description{
-Calculate spectral entropy # TODO: 保留da
+Calculate spectral entropy
 }
 \examples{
 mz <- c(100.212, 300.321, 535.325)

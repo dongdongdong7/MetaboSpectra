@@ -39,12 +39,14 @@ A matrix of spectral peaks, with two columns: mz and intensity
 Clean a spectrum
 
 This function will clean the peaks by the following steps:
-1. Remove empty peaks (mz <= 0 or intensity <= 0).
-2. Remove peaks with mz >= max_mz or mz < min_mz.
-3. Centroid the spectrum by merging peaks within min_ms2_difference_in_da or min_ms2_difference_in_ppm.
-4. Remove peaks with intensity < noise_threshold * max_intensity.
-5. Keep only the top max_peak_num peaks.
-6. Normalize the intensity to sum to 1.
+\enumerate{
+\item Remove empty peaks (mz <= 0 or intensity <= 0).
+\item Remove peaks with mz >= max_mz or mz < min_mz.
+\item Centroid the spectrum by merging peaks within min_ms2_difference_in_da or min_ms2_difference_in_ppm.
+\item Remove peaks with intensity < noise_threshold * max_intensity.
+\item Keep only the top max_peak_num peaks.
+\item Normalize the intensity to sum to 1.
+}
 
 Note: The only one of min_ms2_difference_in_da and min_ms2_difference_in_ppm should be positive.
 }

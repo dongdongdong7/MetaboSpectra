@@ -8,8 +8,10 @@ compare_spMat_ndotproduct(
   x,
   y,
   joinpeak = "inner",
-  tol_da2 = 0.02,
-  tol_ppm2 = -1
+  m = 0L,
+  n = 0.5,
+  ms2_tolerance_in_da = -1,
+  ms2_tolerance_in_ppm = 5
 )
 }
 \arguments{
@@ -17,12 +19,15 @@ compare_spMat_ndotproduct(
 
 \item{y}{spMat_lib.}
 
-\item{joinpeak}{See Spectra::joinPeaks type.
-inner, left, right, outer}
+\item{joinpeak}{inner, left, right, outer; More details please see \link[Spectra:joinPeaks]{Spectra::joinPeaks}}
 
-\item{tol_da2}{Under the Da unit, two peaks are considered the tolerance of one peak.}
+\item{m}{\code{numeric}, weighting for the first column of x and y ("m/z")}
 
-\item{tol_ppm2}{Under the ppm unit, two peaks are considered the tolerance of one peak.}
+\item{n}{\code{numeric}, weighting for the second column of x and y ("intensity")}
+
+\item{min_ms2_difference_in_da}{The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged}
+
+\item{min_ms2_difference_in_ppm}{The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged}
 }
 \value{
 A value.
@@ -40,5 +45,5 @@ intensity <- c(100, 1300, 4030, 10000, 31600)
 standardRow2 <- tibble::tibble(mz = list(mz), intensity = list(intensity))
 spMat2 <- get_spMat(standardRow2)
 # Spectra::joinPeaks(x = spMat1, y = spMat2, type = "inner", tolerance = 0, ppm = 200)
-compare_spMat_ndotproduct(x = spMat1, y = spMat2, joinpeak = "outer", tol_da2 = 0.03)
+compare_spMat_ndotproduct(x = spMat1, y = spMat2, joinpeak = "outer", ms2_tolerance_in_da = 0.03)
 }
