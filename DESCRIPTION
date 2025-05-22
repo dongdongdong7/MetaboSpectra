@@ -1,19 +1,19 @@
 Package: MetaboSpectra
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Metabolomics Spectra Operations
 Version: 0.1.0
-Author: Who wrote it
+Author: Barry Song
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: An R package designed for metabolomics spectra operation.
+    Functions include spectra cleanup, spectra match, etc.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: false
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
     magrittr,
     MsCoreUtils,
-    msentropy,
     Rcpp,
     Spectra
 Depends: 
