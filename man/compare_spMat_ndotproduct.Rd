@@ -25,9 +25,9 @@ compare_spMat_ndotproduct(
 
 \item{n}{\code{numeric}, weighting for the second column of x and y ("intensity")}
 
-\item{min_ms2_difference_in_da}{The minimum mz difference in Da to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_da will be merged}
+\item{ms2_tolerance_in_da}{The MS2 tolerance in Da, set to -1 to disable}
 
-\item{min_ms2_difference_in_ppm}{The minimum mz difference in ppm to merge peaks, set to -1 to disable, any two peaks with mz difference < min_ms2_difference_in_ppm will be merged}
+\item{ms2_tolerance_in_ppm}{The MS2 tolerance in ppm, set to -1 to disable}
 }
 \value{
 A value.
