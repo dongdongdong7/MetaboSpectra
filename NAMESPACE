@@ -2,11 +2,8 @@
 
 export("%>%")
 export(.clean_spectrum)
-export(calculate_entropy_similarity)
 export(calculate_spectral_entropy)
-export(calculate_unweighted_entropy_similarity)
 export(clean_spMat)
-export(clean_spectrum)
 export(compare_spMat_entropy)
 export(compare_spMat_ndotproduct)
 export(get_spMat)
