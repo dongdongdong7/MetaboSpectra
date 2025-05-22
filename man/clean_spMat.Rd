@@ -13,7 +13,8 @@ clean_spMat(
   noise_threshold = 0.01,
   max_peak_num = -1,
   scale_int = 100,
-  normalize_intensity = FALSE
+  normalize_intensity = FALSE,
+  precursorMz = NA
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ clean_spMat(
 \item{scale_int}{Normalized target value, set to -1 to disable}
 
 \item{normalize_intensity}{Whether to normalize the intensity to sum to 1}
+
+\item{precursorMz}{precursorMz of ms2. If spMat is a ms2, then it will usually have precursor ion, m/z greater than the precursorMz is unreasonable}
 }
 \value{
 spMat.

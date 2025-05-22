@@ -59,6 +59,7 @@ get_spMat <- function(standardRow){
 #' @param max_peak_num The maximum number of peaks to keep, set to -1 to disable
 #' @param scale_int Normalized target value, set to -1 to disable
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
+#' @param precursorMz precursorMz of ms2. If spMat is a ms2, then it will usually have precursor ion, m/z greater than the precursorMz is unreasonable
 #'
 #' @return spMat.
 #'
@@ -78,8 +79,18 @@ clean_spMat <- function(spMat,
                         noise_threshold = 0.01,
                         max_peak_num = -1,
                         scale_int = 100,
-                        normalize_intensity = FALSE){
+                        normalize_intensity = FALSE,
+                        precursorMz = NA){
   if(min_ms2_difference_in_da > 0 & min_ms2_difference_in_ppm > 0) min_ms2_difference_in_ppm <- -1
+  # Filter mz > precursorMz
+  if(!is.na(precursorMz)){
+    if(min_ms2_difference_in_da > 0) precursorMz_range <- c(precursorMz - min_ms2_difference_in_da, precursorMz + min_ms2_difference_in_da)
+    if(min_ms2_difference_in_ppm > 0){
+      tol_da <- MsCoreUtils::ppm(precursorMz, ppm = min_ms2_difference_in_ppm)
+      precursorMz_range <- c(precursorMz - tol_da, precursorMz + tol_da)
+    }
+    spMat <- spMat[spMat[, "mz"] < precursorMz_range[2], , drop = FALSE]
+  }
   spMat <- clean_spectrum(spMat = spMat,
                           min_mz = min_mz, max_mz = max_mz,
                           min_ms2_difference_in_da = min_ms2_difference_in_da,
