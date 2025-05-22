@@ -231,86 +231,86 @@ compare_spMat_ndotproduct <- function(x, y, joinpeak = "inner",
 #' data("standardInput", package = "MetaboSpectra")
 #' load("publicMs2List.RData") # please see https://github.com/dongdongdong7/MetaboLib.ms2 and download publicMs2List.RData
 #' searchRes_entropy <- searchLib_entropy(standardInput = standardInput, lib = publicMs2List$hmdb, thread = 8, st = 0.5)
-searchLib_entropy <- function(standardInput, lib, st = 0.8,
-                              tol_da1 = 0.01, tol_ppm1 = -1, tol_da2 = 0.02, tol_ppm2 = -1,
-                              predicted = "All", thread = 1,
-                              min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1){
-  t1 <- Sys.time()
-  if(tol_da1 != -1 & tol_ppm1 != -1) tol_da1 = -1
-  else if(tol_da1 == -1 & tol_ppm1 == -1) stop("tol is wrong!")
-
-  if(tol_da2 != -1 & tol_ppm2 != -1) tol_da2 = -1
-  else if(tol_da2 == -1 & tol_ppm2 == -1) stop("tol is wrong!")
-
-  query_number <- nrow(standardInput)
-  cmps_number <- nrow(lib$cmps)
-  ms2_number <- nrow(lib$ms2)
-  meta <- lib$meta
-  message(paste0("You are using ", "Spectral entropy", " to search library!"))
-  print(meta)
-  message(paste0("query number: ", query_number))
-  message(paste0("cmps number: ", cmps_number))
-  message(paste0("ms2 number: ", ms2_number))
-
-  loop <- function(i){
-    standardInput_tmp <- standardInput[i, ]
-    if(tol_ppm1 != -1)  tol_da1 <- standardInput_tmp$precursorMz * tol_ppm1 * 10^-6
-    lib_ms2_tmp <- lib$ms2 %>%
-      dplyr::filter(dplyr::near(precursorMz, standardInput_tmp$precursorMz, tol = tol_da1)) %>%
-      dplyr::filter(adduct == standardInput_tmp$adduct)
-    if(predicted == "All"){}
-    else if(predicted == "Yes") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(predicted)
-    else if(predicted == "No") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(!predicted)
-    else stop("predicted wrong!")
-
-    if(nrow(lib_ms2_tmp) == 0) return(NULL)
-
-    spMat_query <- get_spMat(standardInput_tmp)
-    spMat_query <- clean_spMat(spMat_query, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
-    score_vec <- sapply(1:nrow(lib_ms2_tmp), function(j) {
-      spMat_lib <- get_spMat(lib_ms2_tmp[j, ])
-      spMat_lib <- clean_spMat(spMat_lib, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
-      score <- msentropy::calculate_entropy_similarity(spMat_query, spMat_lib,
-                                                       ms2_tolerance_in_da = tol_da2, ms2_tolerance_in_ppm = tol_ppm2,
-                                                       clean_spectra = FALSE, min_mz = min_mz, max_mz = max_mz,
-                                                       noise_threshold = noise_threshold,
-                                                       max_peak_num = max_peak_num)
-      return(score)
-    })
-    lib_ms2_tmp$score <- score_vec
-    lib_ms2_tmp <- lib_ms2_tmp %>%
-      dplyr::filter(score >= st) %>%
-      dplyr::arrange(dplyr::desc(score))
-    return(lib_ms2_tmp)
-  }
-
-  pb <- utils::txtProgressBar(max = query_number, style = 3)
-  if(thread == 1){
-    searchRes <- lapply(1:query_number, function(i) {
-      utils::setTxtProgressBar(pb, i)
-      print(i)
-      loop(i)
-    })
-  }else if(thread > 1){
-    cl <- snow::makeCluster(thread)
-    doSNOW::registerDoSNOW(cl)
-    opts <- list(progress = function(n) utils::setTxtProgressBar(pb,
-                                                                 n))
-    searchRes <- foreach::`%dopar%`(foreach::foreach(i = 1:query_number,
-                                                     .options.snow = opts,
-                                                     .packages = c("dplyr", "msentropy"),
-                                                     .export = c("get_spMat", "clean_spMat", "tol_da1")),
-                                    loop(i))
-    snow::stopCluster(cl)
-    gc()
-  }else stop("thread is wrong!")
-  t2 <- Sys.time()
-  stime <- sprintf("%.3f", t2 - t1)
-  message(paste0("\nTime used: ", stime, " ", attr(t2 - t1, "units"), "\n"))
-  return(searchRes)
-}
+# searchLib_entropy <- function(standardInput, lib, st = 0.8,
+#                               tol_da1 = 0.01, tol_ppm1 = -1, tol_da2 = 0.02, tol_ppm2 = -1,
+#                               predicted = "All", thread = 1,
+#                               min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1){
+#   t1 <- Sys.time()
+#   if(tol_da1 != -1 & tol_ppm1 != -1) tol_da1 = -1
+#   else if(tol_da1 == -1 & tol_ppm1 == -1) stop("tol is wrong!")
+#
+#   if(tol_da2 != -1 & tol_ppm2 != -1) tol_da2 = -1
+#   else if(tol_da2 == -1 & tol_ppm2 == -1) stop("tol is wrong!")
+#
+#   query_number <- nrow(standardInput)
+#   cmps_number <- nrow(lib$cmps)
+#   ms2_number <- nrow(lib$ms2)
+#   meta <- lib$meta
+#   message(paste0("You are using ", "Spectral entropy", " to search library!"))
+#   print(meta)
+#   message(paste0("query number: ", query_number))
+#   message(paste0("cmps number: ", cmps_number))
+#   message(paste0("ms2 number: ", ms2_number))
+#
+#   loop <- function(i){
+#     standardInput_tmp <- standardInput[i, ]
+#     if(tol_ppm1 != -1)  tol_da1 <- standardInput_tmp$precursorMz * tol_ppm1 * 10^-6
+#     lib_ms2_tmp <- lib$ms2 %>%
+#       dplyr::filter(dplyr::near(precursorMz, standardInput_tmp$precursorMz, tol = tol_da1)) %>%
+#       dplyr::filter(adduct == standardInput_tmp$adduct)
+#     if(predicted == "All"){}
+#     else if(predicted == "Yes") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(predicted)
+#     else if(predicted == "No") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(!predicted)
+#     else stop("predicted wrong!")
+#
+#     if(nrow(lib_ms2_tmp) == 0) return(NULL)
+#
+#     spMat_query <- get_spMat(standardInput_tmp)
+#     spMat_query <- clean_spMat(spMat_query, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
+#                                min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
+#     score_vec <- sapply(1:nrow(lib_ms2_tmp), function(j) {
+#       spMat_lib <- get_spMat(lib_ms2_tmp[j, ])
+#       spMat_lib <- clean_spMat(spMat_lib, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
+#                                min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, normalize_intensity = TRUE)
+#       score <- msentropy::calculate_entropy_similarity(spMat_query, spMat_lib,
+#                                                        ms2_tolerance_in_da = tol_da2, ms2_tolerance_in_ppm = tol_ppm2,
+#                                                        clean_spectra = FALSE, min_mz = min_mz, max_mz = max_mz,
+#                                                        noise_threshold = noise_threshold,
+#                                                        max_peak_num = max_peak_num)
+#       return(score)
+#     })
+#     lib_ms2_tmp$score <- score_vec
+#     lib_ms2_tmp <- lib_ms2_tmp %>%
+#       dplyr::filter(score >= st) %>%
+#       dplyr::arrange(dplyr::desc(score))
+#     return(lib_ms2_tmp)
+#   }
+#
+#   pb <- utils::txtProgressBar(max = query_number, style = 3)
+#   if(thread == 1){
+#     searchRes <- lapply(1:query_number, function(i) {
+#       utils::setTxtProgressBar(pb, i)
+#       print(i)
+#       loop(i)
+#     })
+#   }else if(thread > 1){
+#     cl <- snow::makeCluster(thread)
+#     doSNOW::registerDoSNOW(cl)
+#     opts <- list(progress = function(n) utils::setTxtProgressBar(pb,
+#                                                                  n))
+#     searchRes <- foreach::`%dopar%`(foreach::foreach(i = 1:query_number,
+#                                                      .options.snow = opts,
+#                                                      .packages = c("dplyr", "msentropy"),
+#                                                      .export = c("get_spMat", "clean_spMat", "tol_da1")),
+#                                     loop(i))
+#     snow::stopCluster(cl)
+#     gc()
+#   }else stop("thread is wrong!")
+#   t2 <- Sys.time()
+#   stime <- sprintf("%.3f", t2 - t1)
+#   message(paste0("\nTime used: ", stime, " ", attr(t2 - t1, "units"), "\n"))
+#   return(searchRes)
+# }
 
 #' @title searchLib_ndotproduct
 #' @description
@@ -362,73 +362,73 @@ searchLib_entropy <- function(standardInput, lib, st = 0.8,
 #' data("standardInput", package = "MetaboSpectra")
 #' load("publicMs2List.RData") # please see https://github.com/dongdongdong7/MetaboLib.ms2 and download publicMs2List.RData
 #' searchRes_ndotproduct <- searchLib_ndotproduct(standardInput, lib = publicMs2List$hmdb)
-searchLib_ndotproduct <- function(standardInput, lib, joinpeak = "inner", st = 0.8,
-                                  tol_da1 = 0.01, tol_ppm1 = -1, tol_da2 = 0.02, tol_ppm2 = -1,
-                                  predicted = "All", thread = 1,
-                                  min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1, scale_int = 100){
-  t1 <- Sys.time()
-  query_number <- nrow(standardInput)
-  cmps_number <- nrow(lib$cmps)
-  ms2_number <- nrow(lib$ms2)
-  meta <- lib$meta
-  message(paste0("You are using ", "ndotproduct with ", joinpeak, " to search library!"))
-  print(meta)
-  message(paste0("query number: ", query_number))
-  message(paste0("cmps number: ", cmps_number))
-  message(paste0("ms2 number: ", ms2_number))
-
-  loop <- function(i){
-    standardInput_tmp <- standardInput[i, ]
-    if(tol_ppm1 != -1)  tol_da1 <- standardInput_tmp$precursorMz * tol_ppm1 * 10^-6
-    lib_ms2_tmp <- lib$ms2 %>%
-      dplyr::filter(dplyr::near(precursorMz, standardInput_tmp$precursorMz, tol = tol_da1)) %>%
-      dplyr::filter(adduct == standardInput_tmp$adduct)
-    if(predicted == "All"){}
-    else if(predicted == "Yes") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(predicted)
-    else if(predicted == "No") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(!predicted)
-    else stop("predicted wrong!")
-
-    if(nrow(lib_ms2_tmp) == 0) return(NULL)
-
-    spMat_query <- get_spMat(standardInput_tmp)
-    spMat_query <- clean_spMat(spMat_query, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
-    score_vec <- sapply(1:nrow(lib_ms2_tmp), function(j) {
-      spMat_lib <- get_spMat(lib_ms2_tmp[j, ])
-      spMat_lib <- clean_spMat(spMat_lib, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
-                               min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
-      score <- compare_spMat_ndotproduct(x = spMat_query, y = spMat_lib, joinpeak = joinpeak, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2)
-      return(score)
-    })
-    lib_ms2_tmp$score <- score_vec
-    lib_ms2_tmp <- lib_ms2_tmp %>%
-      dplyr::filter(score >= st) %>%
-      dplyr::arrange(dplyr::desc(score))
-    return(lib_ms2_tmp)
-  }
-
-  pb <- utils::txtProgressBar(max = query_number, style = 3)
-  if(thread == 1){
-    searchRes <- lapply(1:query_number, function(i) {
-      utils::setTxtProgressBar(pb, i)
-      print(i)
-      loop(i)
-    })
-  }else if(thread > 1){
-    cl <- snow::makeCluster(thread)
-    doSNOW::registerDoSNOW(cl)
-    opts <- list(progress = function(n) utils::setTxtProgressBar(pb,
-                                                                 n))
-    searchRes <- foreach::`%dopar%`(foreach::foreach(i = 1:query_number,
-                                                     .options.snow = opts,
-                                                     .packages = c("dplyr", "Spectra", "MsCoreUtils"),
-                                                     .export = c("get_spMat", "clean_spMat", "compare_spMat_ndotproduct", "tol_da1")),
-                                    loop(i))
-    snow::stopCluster(cl)
-    gc()
-  }else stop("thread is wrong!")
-  t2 <- Sys.time()
-  stime <- sprintf("%.3f", t2 - t1)
-  message(paste0("\nTime used: ", stime, " ", attr(t2 - t1, "units"), "\n"))
-  return(searchRes)
-}
+# searchLib_ndotproduct <- function(standardInput, lib, joinpeak = "inner", st = 0.8,
+#                                   tol_da1 = 0.01, tol_ppm1 = -1, tol_da2 = 0.02, tol_ppm2 = -1,
+#                                   predicted = "All", thread = 1,
+#                                   min_mz = -1, max_mz = -1, noise_threshold = 0.01, max_peak_num = -1, scale_int = 100){
+#   t1 <- Sys.time()
+#   query_number <- nrow(standardInput)
+#   cmps_number <- nrow(lib$cmps)
+#   ms2_number <- nrow(lib$ms2)
+#   meta <- lib$meta
+#   message(paste0("You are using ", "ndotproduct with ", joinpeak, " to search library!"))
+#   print(meta)
+#   message(paste0("query number: ", query_number))
+#   message(paste0("cmps number: ", cmps_number))
+#   message(paste0("ms2 number: ", ms2_number))
+#
+#   loop <- function(i){
+#     standardInput_tmp <- standardInput[i, ]
+#     if(tol_ppm1 != -1)  tol_da1 <- standardInput_tmp$precursorMz * tol_ppm1 * 10^-6
+#     lib_ms2_tmp <- lib$ms2 %>%
+#       dplyr::filter(dplyr::near(precursorMz, standardInput_tmp$precursorMz, tol = tol_da1)) %>%
+#       dplyr::filter(adduct == standardInput_tmp$adduct)
+#     if(predicted == "All"){}
+#     else if(predicted == "Yes") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(predicted)
+#     else if(predicted == "No") lib_ms2_tmp <- lib_ms2_tmp %>% dplyr::filter(!predicted)
+#     else stop("predicted wrong!")
+#
+#     if(nrow(lib_ms2_tmp) == 0) return(NULL)
+#
+#     spMat_query <- get_spMat(standardInput_tmp)
+#     spMat_query <- clean_spMat(spMat_query, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
+#                                min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
+#     score_vec <- sapply(1:nrow(lib_ms2_tmp), function(j) {
+#       spMat_lib <- get_spMat(lib_ms2_tmp[j, ])
+#       spMat_lib <- clean_spMat(spMat_lib, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2,
+#                                min_mz = min_mz, max_mz = max_mz, noise_threshold = noise_threshold, max_peak_num = max_peak_num, scale_int = scale_int)
+#       score <- compare_spMat_ndotproduct(x = spMat_query, y = spMat_lib, joinpeak = joinpeak, tol_da2 = tol_da2, tol_ppm2 = tol_ppm2)
+#       return(score)
+#     })
+#     lib_ms2_tmp$score <- score_vec
+#     lib_ms2_tmp <- lib_ms2_tmp %>%
+#       dplyr::filter(score >= st) %>%
+#       dplyr::arrange(dplyr::desc(score))
+#     return(lib_ms2_tmp)
+#   }
+#
+#   pb <- utils::txtProgressBar(max = query_number, style = 3)
+#   if(thread == 1){
+#     searchRes <- lapply(1:query_number, function(i) {
+#       utils::setTxtProgressBar(pb, i)
+#       print(i)
+#       loop(i)
+#     })
+#   }else if(thread > 1){
+#     cl <- snow::makeCluster(thread)
+#     doSNOW::registerDoSNOW(cl)
+#     opts <- list(progress = function(n) utils::setTxtProgressBar(pb,
+#                                                                  n))
+#     searchRes <- foreach::`%dopar%`(foreach::foreach(i = 1:query_number,
+#                                                      .options.snow = opts,
+#                                                      .packages = c("dplyr", "Spectra", "MsCoreUtils"),
+#                                                      .export = c("get_spMat", "clean_spMat", "compare_spMat_ndotproduct", "tol_da1")),
+#                                     loop(i))
+#     snow::stopCluster(cl)
+#     gc()
+#   }else stop("thread is wrong!")
+#   t2 <- Sys.time()
+#   stime <- sprintf("%.3f", t2 - t1)
+#   message(paste0("\nTime used: ", stime, " ", attr(t2 - t1, "units"), "\n"))
+#   return(searchRes)
+# }
