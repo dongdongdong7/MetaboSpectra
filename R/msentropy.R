@@ -1,4 +1,6 @@
-#' @title Calculate spectral entropy # TODO: 保留da
+# Copy from YuanyueLi/msentropy
+
+#' @title Calculate spectral entropy
 #'
 #' @param spMat A matrix of spectrum, with two columns: m/z and intensity
 #'
@@ -28,7 +30,6 @@ calculate_spectral_entropy <- function(spMat){
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
 #'
 #' @returns A matrix of spectral peaks, with two columns: mz and intensity
-#' @export
 #'
 #' @examples
 #' mz <- c(100.212, 169.071, 169.078, 300.321)
@@ -56,14 +57,12 @@ clean_spectrum <- function(spMat,
 #' @description Calculate the unweighted entropy similarity between two spectra.
 #' Two spectra sholud be cleaned before calculating.
 #'
-#'
 #' @param spMat1 A matrix of spectral peaks, with two columns: mz and intensity
 #' @param spMat2 A matrix of spectral peaks, with two columns: mz and intensity
 #' @param ms2_tolerance_in_da The MS2 tolerance in Da, set to -1 to disable
 #' @param ms2_tolerance_in_ppm The MS2 tolerance in ppm, set to -1 to disable
 #'
 #' @return The unweighted entropy similarity
-#' @export
 #'
 #' @examples
 #' mz_a <- c(169.071, 186.066, 186.0769)
@@ -94,7 +93,6 @@ calculate_unweighted_entropy_similarity <- function(spMat1, spMat2,
 #' @param ms2_tolerance_in_da The MS2 tolerance in Da, set to -1 to disable
 #' @param ms2_tolerance_in_ppm The MS2 tolerance in ppm, set to -1 to disable
 #' @return The entropy similarity
-#' @export
 #' @examples
 #' mz_a <- c(169.071, 186.066, 186.0769)
 #' intensity_a <- c(7.917962, 1.021589, 100.0)
