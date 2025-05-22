@@ -8,8 +8,8 @@ plotComparableSpectra(
   spMat_query,
   spMat_lib,
   num = 10,
-  tol_da2 = 0.02,
-  tol_ppm2 = -1
+  ms2_tolerance_in_da = -1,
+  ms2_tolerance_in_ppm = 5
 )
 }
 \arguments{
@@ -19,9 +19,9 @@ plotComparableSpectra(
 
 \item{num}{max peak number}
 
-\item{tol_da2}{Under the Da unit, two peaks are considered the tolerance of one peak.}
+\item{ms2_tolerance_in_da}{The MS2 tolerance in Da, set to -1 to disable}
 
-\item{tol_ppm2}{Under the ppm unit, two peaks are considered the tolerance of one peak.}
+\item{ms2_tolerance_in_ppm}{The MS2 tolerance in ppm, set to -1 to disable}
 }
 \value{
 A ggplot object.
