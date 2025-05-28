@@ -56,6 +56,7 @@ get_spMat <- function(standardRow){
 #' @param min_mz The minimum mz value to keep, set to -1 to disable
 #' @param max_mz The maximum mz value to keep, set to -1 to disable
 #' @param noise_threshold The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed
+#' @param noise maximum noise values, set ro -1 to disable
 #' @param max_peak_num The maximum number of peaks to keep, set to -1 to disable
 #' @param scale_int Normalized target value, set to -1 to disable
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
@@ -77,6 +78,7 @@ clean_spMat <- function(spMat,
                         min_ms2_difference_in_ppm = 5,
                         min_mz = -1, max_mz = -1,
                         noise_threshold = 0.01,
+                        noise = -1,
                         max_peak_num = -1,
                         scale_int = 100,
                         normalize_intensity = FALSE,
@@ -90,6 +92,10 @@ clean_spMat <- function(spMat,
       precursorMz_range <- c(precursorMz - tol_da, precursorMz + tol_da)
     }
     spMat <- spMat[spMat[, "mz"] < precursorMz_range[2], , drop = FALSE]
+  }
+  # Filter noise
+  if(noise > 0){
+    spMat <- spMat[spMat[, "intensity"] > noise, , drop = FALSE]
   }
   spMat <- clean_spectrum(spMat = spMat,
                           min_mz = min_mz, max_mz = max_mz,

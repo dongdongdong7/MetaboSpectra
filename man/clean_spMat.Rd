@@ -11,6 +11,7 @@ clean_spMat(
   min_mz = -1,
   max_mz = -1,
   noise_threshold = 0.01,
+  noise = -1,
   max_peak_num = -1,
   scale_int = 100,
   normalize_intensity = FALSE,
@@ -29,6 +30,8 @@ clean_spMat(
 \item{max_mz}{The maximum mz value to keep, set to -1 to disable}
 
 \item{noise_threshold}{The noise threshold, set to -1 to disable, all peaks have intensity < noise_threshold * max_intensity will be removed}
+
+\item{noise}{maximum noise values, set ro -1 to disable}
 
 \item{max_peak_num}{The maximum number of peaks to keep, set to -1 to disable}
 
