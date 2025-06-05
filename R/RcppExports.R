@@ -40,7 +40,6 @@
 #' @param normalize_intensity Whether to normalize the intensity to sum to 1
 #'
 #' @return A matrix of spectral peaks, with two columns: mz and intensity
-#' @export
 #'
 #' @examples
 #' mz <- c(100.212, 169.071, 169.078, 300.321)
@@ -118,5 +117,13 @@
 #'
 .calculate_entropy_similarity <- function(peaks_a, peaks_b, ms2_tolerance_in_da, ms2_tolerance_in_ppm, clean_spectra, min_mz, max_mz, noise_threshold, max_peak_num) {
     .Call(`_MetaboSpectra_r_calculate_entropy_similarity`, peaks_a, peaks_b, ms2_tolerance_in_da, ms2_tolerance_in_ppm, clean_spectra, min_mz, max_mz, noise_threshold, max_peak_num)
+}
+
+.slim_peaksMatrix_rcpp <- function(peaksMatrix, ppm = 5, mz_method = "median", intensity_method = "sum") {
+    .Call(`_MetaboSpectra_slim_peaksMatrix_rcpp`, peaksMatrix, ppm, mz_method, intensity_method)
+}
+
+.batch_slim_peaksMatrix_rcpp <- function(peaksMatrixList, ppm = 5, mz_method = "median", intensity_method = "sum") {
+    .Call(`_MetaboSpectra_batch_slim_peaksMatrix_rcpp`, peaksMatrixList, ppm, mz_method, intensity_method)
 }
 

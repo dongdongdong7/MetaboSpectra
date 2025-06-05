@@ -77,12 +77,42 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// slim_peaksMatrix_rcpp
+Rcpp::NumericMatrix slim_peaksMatrix_rcpp(Rcpp::NumericMatrix peaksMatrix, double ppm, std::string mz_method, std::string intensity_method);
+RcppExport SEXP _MetaboSpectra_slim_peaksMatrix_rcpp(SEXP peaksMatrixSEXP, SEXP ppmSEXP, SEXP mz_methodSEXP, SEXP intensity_methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type peaksMatrix(peaksMatrixSEXP);
+    Rcpp::traits::input_parameter< double >::type ppm(ppmSEXP);
+    Rcpp::traits::input_parameter< std::string >::type mz_method(mz_methodSEXP);
+    Rcpp::traits::input_parameter< std::string >::type intensity_method(intensity_methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(slim_peaksMatrix_rcpp(peaksMatrix, ppm, mz_method, intensity_method));
+    return rcpp_result_gen;
+END_RCPP
+}
+// batch_slim_peaksMatrix_rcpp
+Rcpp::List batch_slim_peaksMatrix_rcpp(Rcpp::List peaksMatrixList, double ppm, std::string mz_method, std::string intensity_method);
+RcppExport SEXP _MetaboSpectra_batch_slim_peaksMatrix_rcpp(SEXP peaksMatrixListSEXP, SEXP ppmSEXP, SEXP mz_methodSEXP, SEXP intensity_methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type peaksMatrixList(peaksMatrixListSEXP);
+    Rcpp::traits::input_parameter< double >::type ppm(ppmSEXP);
+    Rcpp::traits::input_parameter< std::string >::type mz_method(mz_methodSEXP);
+    Rcpp::traits::input_parameter< std::string >::type intensity_method(intensity_methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(batch_slim_peaksMatrix_rcpp(peaksMatrixList, ppm, mz_method, intensity_method));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_MetaboSpectra_r_calculate_spectral_entropy", (DL_FUNC) &_MetaboSpectra_r_calculate_spectral_entropy, 1},
     {"_MetaboSpectra_r_clean_spectrum", (DL_FUNC) &_MetaboSpectra_r_clean_spectrum, 8},
     {"_MetaboSpectra_r_calculate_unweighted_entropy_similarity", (DL_FUNC) &_MetaboSpectra_r_calculate_unweighted_entropy_similarity, 9},
     {"_MetaboSpectra_r_calculate_entropy_similarity", (DL_FUNC) &_MetaboSpectra_r_calculate_entropy_similarity, 9},
+    {"_MetaboSpectra_slim_peaksMatrix_rcpp", (DL_FUNC) &_MetaboSpectra_slim_peaksMatrix_rcpp, 4},
+    {"_MetaboSpectra_batch_slim_peaksMatrix_rcpp", (DL_FUNC) &_MetaboSpectra_batch_slim_peaksMatrix_rcpp, 4},
     {NULL, NULL, 0}
 };
 
